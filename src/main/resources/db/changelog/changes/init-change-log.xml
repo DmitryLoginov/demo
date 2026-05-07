@@ -1,4 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="001-create-account-status" author="ldv">
+        <createTable tableName="account_status">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
+    <changeSet id="002-create-client" author="ldv">
+        <createTable tableName="client">
+            <!-- uuid генерируем в коде -->
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="full_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="citizenship" type="varchar(255)"/>
+            <column name="client_type" type="varchar(255)"/>
+            <column name="document_number" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_series" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mdm_code" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-account" author="ldv">
+        <createTable tableName="account">
+            <!-- uuid генерируем в коде -->
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="status_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_type" type="varchar(255)"/>
+            <column name="currency_code" type="varchar(255)"/>
+        </createTable>
+
+        <!-- FK account -> account_status -->
+        <addForeignKeyConstraint baseTableName="account"
+                                 baseColumnNames="status_id"
+                                 constraintName="fk_account_status"
+                                 referencedTableName="account_status"
+                                 referencedColumnNames="id"/>
+        <!-- FK account -> client -->
+        <addForeignKeyConstraint baseTableName="account"
+                                 baseColumnNames="client_id"
+                                 constraintName="fk_account_client"
+                                 referencedTableName="client"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+    
+    <changeSet id="004-fill-account-status" author="ldv">
+        <insert tableName="account_status">
+            <column name="name" value="NEW"/>
+            <column name="description" value="Счет создан в БД"/>
+        </insert>
+        <insert tableName="account_status">
+            <column name="name" value="IN_CREATION"/>
+            <column name="description" value="Запрос на создание счета был отправлен в смежную систему"/>
+        </insert>
+        <insert tableName="account_status">
+            <column name="name" value="CREATED"/>
+            <column name="description" value="Счет создан в смежной системе"/>
+        </insert>
+        <insert tableName="account_status">
+            <column name="name" value="CANCELLED"/>
+            <column name="description" value="Счет аннулирован"/>
+        </insert>
+        <insert tableName="account_status">
+            <column name="name" value="CLOSED"/>
+            <column name="description" value="Счет закрыт"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
