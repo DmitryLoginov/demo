@@ -1,7 +1,7 @@
 package dev.ldv.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.ldv.utils.ObjectMapperUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,9 +25,7 @@ public class AccountStatus {
     @Override
     public String toString() {
         try {
-            return new ObjectMapper()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(this);
+            return ObjectMapperUtils.writeValueAsString(this);
         } catch (JsonProcessingException jsonProcessingException) {
             return super.toString();
         }
