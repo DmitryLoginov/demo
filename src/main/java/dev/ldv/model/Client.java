@@ -1,9 +1,10 @@
 package dev.ldv.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.UUID;
 
@@ -11,7 +12,6 @@ import java.util.UUID;
 @Table(name = "client")
 @Getter
 @Setter
-@ToString
 public class Client {
     @Id
     @Column(name = "id", nullable = false)
@@ -38,4 +38,15 @@ public class Client {
 
     @Column(name = "mdm_code")
     private Long mdmCode;
+
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(this);
+        } catch (JsonProcessingException jsonProcessingException) {
+            return super.toString();
+        }
+    }
 }
