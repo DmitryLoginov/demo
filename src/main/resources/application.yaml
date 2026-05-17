@@ -14,4 +14,10 @@ spring:
     properties.hibernate:
       jdbc.time_zone: UTC
       format_sql: true
-  sql.init.mode: always
+  liquibase:
+    enabled: true
+    change-log: ${DATABASE_CHANGELOG}
+
+logging:
+  level:
+    root: INFO
