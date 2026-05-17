@@ -17,7 +17,3 @@ spring:
   liquibase:
     enabled: true
     change-log: ${DATABASE_CHANGELOG}
-
-logging:
-  level:
-    root: INFO
