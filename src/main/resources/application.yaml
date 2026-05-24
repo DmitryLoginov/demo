@@ -1,5 +1,5 @@
 server:
-  port: 0
+  port: 8080
 
 spring:
   datasource:
@@ -17,3 +17,17 @@ spring:
   liquibase:
     enabled: true
     change-log: ${DATABASE_CHANGELOG}
+
+management:
+  server:
+    port: 8081
+  endpoint:
+    shutdown:
+      enabled: false
+    health:
+      show-details: always
+  endpoints:
+    web:
+      base-path: ${ACTUATOR_BASEPATH}
+      exposure:
+        include: "health,info,threaddump,liquibase,metrics,mappings,beans,env"
