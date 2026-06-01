@@ -1,0 +1,449 @@
+openapi: 3.0.3
+info:
+  title: ms-account-reservation
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Клиенты
+    description: API для работы с клиентами
+paths:
+  /api/v1/clients:
+    post:
+      tags:
+        - Клиенты
+      description: Создание нового клиента
+      requestBody:
+        description: Новый клиент
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewClientRequest'
+        required: true
+      responses:
+        '201':
+          description: Новый клиент с присвоенным UUID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          description: Невалидные данные в запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Клиент с таким mdmCode уже существует
+          content:
+            application/json:
+              example:
+                errorCode: CONFLICT
+                errorDescription: Клиент с таким mdmCode уже существует
+                statusCode: 409
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      tags:
+        - Клиенты
+      description: Получение клиентов с пагинацией
+      parameters:
+        - description: Номер страницы
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - description: Размер страницы
+          in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - description: Фильтр по фамилии
+          in: query
+          name: lastName
+          required: false
+          schema:
+            type: string
+        - description: Фильтр по mdmCode
+          in: query
+          name: mdmCode
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Страница со сведениями о клиентах
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientPageResponse'
+  /api/v1/clients/{clientId}:
+    get:
+      tags:
+        - Клиенты
+      description: Получение клиента по ID
+      parameters:
+        - description: ID клиента
+          in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        '200':
+          description: Сведения о запрашиваемом клиенте
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '404':
+          description: Запрашиваемый клиент не найден
+          content:
+            application/json:
+              example:
+                errorCode: NOT_FOUND
+                errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
+                statusCode: 404
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    put:
+      tags:
+        - Клиенты
+      description: Обновление клиента
+      parameters:
+        - description: ID клиента
+          in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: UUID
+      requestBody:
+        description: Обновленные данные о клиенте
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClientRequest'
+        required: true
+      responses:
+        '200':
+          description: Данные о клиенте успешно обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          description: Невалидные данные в запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Запрашиваемый клиент не найден
+          content:
+            application/json:
+              example:
+                errorCode: NOT_FOUND
+                errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
+                statusCode: 404
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    delete:
+      tags:
+        - Клиенты
+      description: Удаление клиента (soft delete)
+      parameters:
+        - description: ID клиента
+          in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        '204':
+          description: Клиент удален
+        '404':
+          description: Запрашиваемый клиент не найден
+          content:
+            application/json:
+              example:
+                errorCode: NOT_FOUND
+                errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
+                statusCode: 404
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: У клиента есть активные счета
+          content:
+            application/json:
+              example:
+                errorCode: CONFLICT
+                errorDescription: У клиента есть активные счета
+                statusCode: 409
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/v1/clients/{clientId}/exists:
+    get:
+      tags:
+        - Клиенты
+      description: Проверка существования клиента
+      parameters:
+        - description: ID клиента
+          in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        '200':
+          description: Результат проверки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientShortDto'
+
+components:
+  schemas:
+    ApiError:
+      type: object
+      description: Сведения об ошибке
+      properties:
+        errorCode:
+          type: string
+          description: Текстовый мнемокод
+          example: BAD_REQUEST
+        errorDescription:
+          type: string
+          description: Бизнес-описание ошибки
+          example: Поле fullName должно быть заполнено
+        statusCode:
+          type: integer
+          description: HTTP-код ошибки
+          example: 400
+          enum:
+            - 100 CONTINUE
+            - 101 SWITCHING_PROTOCOLS
+            - 102 PROCESSING
+            - 103 CHECKPOINT
+            - 200 OK
+            - 201 CREATED
+            - 202 ACCEPTED
+            - 203 NON_AUTHORITATIVE_INFORMATION
+            - 204 NO_CONTENT
+            - 205 RESET_CONTENT
+            - 206 PARTIAL_CONTENT
+            - 207 MULTI_STATUS
+            - 208 ALREADY_REPORTED
+            - 226 IM_USED
+            - 300 MULTIPLE_CHOICES
+            - 301 MOVED_PERMANENTLY
+            - 302 FOUND
+            - 302 MOVED_TEMPORARILY
+            - 303 SEE_OTHER
+            - 304 NOT_MODIFIED
+            - 305 USE_PROXY
+            - 307 TEMPORARY_REDIRECT
+            - 308 PERMANENT_REDIRECT
+            - 400 BAD_REQUEST
+            - 401 UNAUTHORIZED
+            - 402 PAYMENT_REQUIRED
+            - 403 FORBIDDEN
+            - 404 NOT_FOUND
+            - 405 METHOD_NOT_ALLOWED
+            - 406 NOT_ACCEPTABLE
+            - 407 PROXY_AUTHENTICATION_REQUIRED
+            - 408 REQUEST_TIMEOUT
+            - 409 CONFLICT
+            - 410 GONE
+            - 411 LENGTH_REQUIRED
+            - 412 PRECONDITION_FAILED
+            - 413 PAYLOAD_TOO_LARGE
+            - 413 REQUEST_ENTITY_TOO_LARGE
+            - 414 URI_TOO_LONG
+            - 414 REQUEST_URI_TOO_LONG
+            - 415 UNSUPPORTED_MEDIA_TYPE
+            - 416 REQUESTED_RANGE_NOT_SATISFIABLE
+            - 417 EXPECTATION_FAILED
+            - 418 I_AM_A_TEAPOT
+            - 419 INSUFFICIENT_SPACE_ON_RESOURCE
+            - 420 METHOD_FAILURE
+            - 421 DESTINATION_LOCKED
+            - 422 UNPROCESSABLE_ENTITY
+            - 423 LOCKED
+            - 424 FAILED_DEPENDENCY
+            - 425 TOO_EARLY
+            - 426 UPGRADE_REQUIRED
+            - 428 PRECONDITION_REQUIRED
+            - 429 TOO_MANY_REQUESTS
+            - 431 REQUEST_HEADER_FIELDS_TOO_LARGE
+            - 451 UNAVAILABLE_FOR_LEGAL_REASONS
+            - 500 INTERNAL_SERVER_ERROR
+            - 501 NOT_IMPLEMENTED
+            - 502 BAD_GATEWAY
+            - 503 SERVICE_UNAVAILABLE
+            - 504 GATEWAY_TIMEOUT
+            - 505 HTTP_VERSION_NOT_SUPPORTED
+            - 506 VARIANT_ALSO_NEGOTIATES
+            - 507 INSUFFICIENT_STORAGE
+            - 508 LOOP_DETECTED
+            - 509 BANDWIDTH_LIMIT_EXCEEDED
+            - 510 NOT_EXTENDED
+            - 511 NETWORK_AUTHENTICATION_REQUIRED
+    NewClientRequest:
+      required:
+        - fullName
+        - documentNumber
+        - documentSeries
+        - documentType
+      description: Данные нового клиента
+      type: object
+      properties:
+        fullName:
+          type: string
+          description: Полное имя
+          example: Иван Иванов
+        citizenship:
+          type: string
+          description: Гражданство
+          example: Российская Федерация
+        clientType:
+          type: string
+          description: Тип клиента
+        documentNumber:
+          type: string
+          description: Номер документа
+          example: 456789
+        documentSeries:
+          type: string
+          description: Серия документа
+          example: '0123'
+        documentType:
+          type: string
+          description: Вид документа
+          example: Паспорт
+        mdmCode:
+          type: string
+          description: MDM-идентификатор
+          example: 1234567890
+    ClientDto:
+      description: Информация о клиенте
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+          description: Уникальный идентификатор
+          example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        fullName:
+          type: string
+          description: Полное имя
+          example: Иван Иванов
+        citizenship:
+          type: string
+          description: Гражданство
+          example: Российская Федерация
+        clientType:
+          type: string
+          description: Тип клиента
+        documentNumber:
+          type: string
+          description: Номер документа
+          example: 456789
+        documentSeries:
+          type: string
+          description: Серия документа
+          example: '0123'
+        documentType:
+          type: string
+          description: Вид документа
+          example: Паспорт
+        mdmCode:
+          type: string
+          description: MDM-идентификатор
+          example: 1234567890
+        hasAccounts:
+          type: boolean
+          description: Есть ли у пользователя аккаунты
+          example: false
+    UpdateClientRequest:
+      description: Обновленные данные о клиенте
+      type: object
+      properties:
+        fullName:
+          type: string
+          description: Полное имя
+          example: Иван Иванов
+        citizenship:
+          type: string
+          description: Гражданство
+          example: Российская Федерация
+        documentNumber:
+          type: string
+          description: Номер документа
+          example: 456789
+        documentSeries:
+          type: string
+          description: Серия документа
+          example: '0123'
+        documentType:
+          type: string
+          description: Вид документа
+          example: Паспорт
+    PageableObject:
+      description: Метаданные пагинации
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          description: Номер страницы
+          example: 0
+        pageSize:
+          type: integer
+          description: Размер страницы
+          example: 20
+        totalPages:
+          type: integer
+          description: Всего страниц
+          example: 1
+        totalElements:
+          type: integer
+          description: Всего элементов
+          example: 1
+    ClientPageResponse:
+      description: Страница с данными о клиентах
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientDto'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+    ClientShortDto:
+      description: Краткая информация о клиенте
+      type: object
+      properties:
+        exists:
+          type: boolean
+          description: Факт наличия информации о клиенте в БД
+          example: true
+        clientId:
+          type: string
+          format: UUID
+          description: Уникальный идентификатор
+          example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        status:
+          type: string
+          description: Статус учетной записи
+          example: ACTIVE
+          enum:
+            - ACTIVE
+            - BLOCKED
+            - DELETED
