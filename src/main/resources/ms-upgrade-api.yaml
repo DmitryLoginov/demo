@@ -6,15 +6,16 @@ servers:
   - url: http://localhost:8080
 tags:
   - name: Клиенты
-    description: API для работы с клиентами
+    description: API для управления клиентами
 paths:
   /api/v1/clients:
     post:
       tags:
         - Клиенты
       description: Создание нового клиента
+      summary: Создание нового клиента
       requestBody:
-        description: Новый клиент
+        description: Сведения о новом клиенте
         content:
           application/json:
             schema:
@@ -22,17 +23,13 @@ paths:
         required: true
       responses:
         '201':
-          description: Новый клиент с присвоенным UUID
+          description: Новый клиент с присвоенным ID
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientDto'
         '400':
-          description: Невалидные данные в запросе
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
+          $ref: '#/components/responses/ClientValidationError'
         '409':
           description: Клиент с таким mdmCode уже существует
           content:
@@ -46,7 +43,8 @@ paths:
     get:
       tags:
         - Клиенты
-      description: Получение клиентов с пагинацией
+      description: Получение списка клиентов с пагинацией
+      summary: Получение списка клиентов
       parameters:
         - description: Номер страницы
           in: query
@@ -86,14 +84,9 @@ paths:
       tags:
         - Клиенты
       description: Получение клиента по ID
+      summary: Получение клиента по ID
       parameters:
-        - description: ID клиента
-          in: path
-          name: clientId
-          required: true
-          schema:
-            type: string
-            format: UUID
+        - $ref: '#/components/parameters/ClientId'
       responses:
         '200':
           description: Сведения о запрашиваемом клиенте
@@ -102,29 +95,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/ClientDto'
         '404':
-          description: Запрашиваемый клиент не найден
-          content:
-            application/json:
-              example:
-                errorCode: NOT_FOUND
-                errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
-                statusCode: 404
-              schema:
-                $ref: '#/components/schemas/ApiError'
+          $ref: '#/components/responses/ClientNotFoundError'
     put:
       tags:
         - Клиенты
-      description: Обновление клиента
+      description: Обновление информации о клиенте
+      summary: Обновление клиента
       parameters:
-        - description: ID клиента
-          in: path
-          name: clientId
-          required: true
-          schema:
-            type: string
-            format: UUID
+        - $ref: '#/components/parameters/ClientId'
       requestBody:
-        description: Обновленные данные о клиенте
+        description: Обновленные данные клиента
         content:
           application/json:
             schema:
@@ -138,46 +118,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/ClientDto'
         '400':
-          description: Невалидные данные в запросе
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
+          $ref: '#/components/responses/ClientValidationError'
         '404':
-          description: Запрашиваемый клиент не найден
-          content:
-            application/json:
-              example:
-                errorCode: NOT_FOUND
-                errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
-                statusCode: 404
-              schema:
-                $ref: '#/components/schemas/ApiError'
+          $ref: '#/components/responses/ClientNotFoundError'
     delete:
       tags:
         - Клиенты
       description: Удаление клиента (soft delete)
+      summary: Удаление клиента
       parameters:
-        - description: ID клиента
-          in: path
-          name: clientId
-          required: true
-          schema:
-            type: string
-            format: UUID
+        - $ref: '#/components/parameters/ClientId'
       responses:
         '204':
           description: Клиент удален
         '404':
-          description: Запрашиваемый клиент не найден
-          content:
-            application/json:
-              example:
-                errorCode: NOT_FOUND
-                errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
-                statusCode: 404
-              schema:
-                $ref: '#/components/schemas/ApiError'
+          $ref: '#/components/responses/ClientNotFoundError'
         '409':
           description: У клиента есть активные счета
           content:
@@ -193,14 +148,9 @@ paths:
       tags:
         - Клиенты
       description: Проверка существования клиента
+      summary: Проверка существования клиента
       parameters:
-        - description: ID клиента
-          in: path
-          name: clientId
-          required: true
-          schema:
-            type: string
-            format: UUID
+        - $ref: '#/components/parameters/ClientId'
       responses:
         '200':
           description: Результат проверки
@@ -447,3 +397,32 @@ components:
             - ACTIVE
             - BLOCKED
             - DELETED
+  # Переиспользуемые параметры
+  parameters:
+    ClientId:
+      description: ID клиента
+      in: path
+      name: clientId
+      required: true
+      schema:
+        type: string
+        format: UUID
+        example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+  # Переиспользуемые ответы
+  responses:
+    ClientValidationError:
+      description: Некорректные данные в запросе
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ClientNotFoundError:
+      description: Запрашиваемый клиент не найден
+      content:
+        application/json:
+          example:
+            errorCode: NOT_FOUND
+            errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
+            statusCode: 404
+          schema:
+            $ref: '#/components/schemas/ApiError'
