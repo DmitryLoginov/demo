@@ -1,11 +1,13 @@
 package dev.ldv.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dev.ldv.utils.ObjectMapperUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import dev.ldv.utils.ObjectMapperUtils;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -18,26 +20,27 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Embedded
+    private Name fullName;
 
     @Column(name = "citizenship")
     private String citizenship;
 
-    @Column(name = "client_type")
-    private String clientType;
+    @Column(name = "client_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ClientStatus clientStatus;
 
-    @Column(name = "document_number", nullable = false)
-    private String documentNumber;
-
-    @Column(name = "document_series", nullable = false)
-    private String documentSeries;
-
-    @Column(name = "document_type", nullable = false)
-    private String documentType;
+    @Embedded
+    private Document document;
 
     @Column(name = "mdm_code")
     private Long mdmCode;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @Override
     public String toString() {

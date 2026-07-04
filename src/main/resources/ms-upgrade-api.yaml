@@ -248,24 +248,36 @@ components:
             - 511 NETWORK_AUTHENTICATION_REQUIRED
     NewClientRequest:
       required:
-        - fullName
+        - firstName
+        - lastName
+        - middleName
+        - mdmCode
         - documentNumber
         - documentSeries
         - documentType
       description: Данные нового клиента
       type: object
       properties:
-        fullName:
+        firstName:
           type: string
-          description: Полное имя
-          example: Иван Иванов
+          description: Имя
+          example: Иван
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
         citizenship:
           type: string
           description: Гражданство
           example: Российская Федерация
-        clientType:
+        clientStatus:
           type: string
-          description: Тип клиента
+          description: Статус (тип) клиента
+          example: ACTIVE
         documentNumber:
           type: string
           description: Номер документа
@@ -291,17 +303,26 @@ components:
           format: UUID
           description: Уникальный идентификатор
           example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-        fullName:
+        firstName:
           type: string
-          description: Полное имя
-          example: Иван Иванов
+          description: Имя
+          example: Иван
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
         citizenship:
           type: string
           description: Гражданство
           example: Российская Федерация
-        clientType:
+        clientStatus:
           type: string
-          description: Тип клиента
+          description: Статус (тип) клиента
+          example: ACTIVE
         documentNumber:
           type: string
           description: Номер документа
@@ -318,6 +339,14 @@ components:
           type: string
           description: MDM-идентификатор
           example: 1234567890
+        createdAt:
+          type: string
+          description: Дата и время создания учетной записи
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          description: Дата и время последнего обновления
+          example: "2024-01-15T10:30:00Z"
         hasAccounts:
           type: boolean
           description: Есть ли у пользователя аккаунты

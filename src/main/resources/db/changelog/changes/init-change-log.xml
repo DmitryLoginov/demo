@@ -31,11 +31,19 @@
             <column name="id" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="full_name" type="varchar(255)">
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="citizenship" type="varchar(255)"/>
-            <column name="client_type" type="varchar(255)"/>
+            <column name="client_status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="document_number" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -46,6 +54,12 @@
                 <constraints nullable="false"/>
             </column>
             <column name="mdm_code" type="bigint"/>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
