@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import dev.ldv.utils.ObjectMapperUtils;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -33,14 +33,14 @@ public class Client {
     @Embedded
     private Document document;
 
-    @Column(name = "mdm_code")
+    @Column(name = "mdm_code", unique = true)
     private Long mdmCode;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Override
     public String toString() {
