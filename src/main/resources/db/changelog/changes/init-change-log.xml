@@ -53,11 +53,13 @@
             <column name="document_type" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="mdm_code" type="bigint"/>
-            <column name="created_at" type="timestamp">
+            <column name="mdm_code" type="bigint">
+                <constraints unique="true"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
                 <constraints nullable="false"/>
             </column>
-            <column name="updated_at" type="timestamp">
+            <column name="updated_at" type="timestamp with time zone">
                 <constraints nullable="false"/>
             </column>
         </createTable>
