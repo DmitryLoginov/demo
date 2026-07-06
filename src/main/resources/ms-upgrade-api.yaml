@@ -39,7 +39,7 @@ paths:
                 errorDescription: Клиент с таким mdmCode уже существует
                 statusCode: 409
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: '#/components/schemas/ErrorDto'
     get:
       tags:
         - Клиенты
@@ -78,7 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClientPageResponse'
+                $ref: '#/components/schemas/PageResponse'
   /api/v1/clients/{clientId}:
     get:
       tags:
@@ -142,7 +142,7 @@ paths:
                 errorDescription: У клиента есть активные счета
                 statusCode: 409
               schema:
-                $ref: '#/components/schemas/ApiError'
+                $ref: '#/components/schemas/ErrorDto'
   /api/v1/clients/{clientId}/exists:
     get:
       tags:
@@ -161,7 +161,7 @@ paths:
 
 components:
   schemas:
-    ApiError:
+    ErrorDto:
       type: object
       description: Сведения об ошибке
       properties:
@@ -172,7 +172,7 @@ components:
         errorDescription:
           type: string
           description: Бизнес-описание ошибки
-          example: Поле fullName должно быть заполнено
+          example: Поле lastName должно быть заполнено
         statusCode:
           type: integer
           description: HTTP-код ошибки
@@ -355,10 +355,18 @@ components:
       description: Обновленные данные о клиенте
       type: object
       properties:
-        fullName:
+        firstName:
           type: string
-          description: Полное имя
-          example: Иван Иванов
+          description: Имя
+          example: Иван
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
         citizenship:
           type: string
           description: Гражданство
@@ -395,7 +403,7 @@ components:
           type: integer
           description: Всего элементов
           example: 1
-    ClientPageResponse:
+    PageResponse:
       description: Страница с данными о клиентах
       type: object
       properties:
@@ -444,14 +452,14 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ErrorDto'
     ClientNotFoundError:
       description: Запрашиваемый клиент не найден
       content:
         application/json:
           example:
             errorCode: NOT_FOUND
-            errorDescription: Клиент с ID = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
+            errorDescription: Клиент с id = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
             statusCode: 404
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ErrorDto'
