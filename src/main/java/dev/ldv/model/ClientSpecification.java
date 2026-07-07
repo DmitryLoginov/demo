@@ -16,8 +16,37 @@ public final class ClientSpecification {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if (filter.getFirstName() != null && !filter.getFirstName().isBlank()) {
+                predicates.add(
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("fullName").get("firstName")),
+                                "%" + filter.getFirstName().toLowerCase() + "%"
+                        )
+                );
+            }
+
             if (filter.getLastName() != null && !filter.getLastName().isBlank()) {
-                predicates.add(criteriaBuilder.equal(root.get("lastName"), filter.getLastName()));
+                predicates.add(
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("fullName").get("lastName")),
+                                "%" + filter.getLastName().toLowerCase() + "%"
+                        )
+                );
+            }
+
+            if (filter.getMiddleName() != null && !filter.getMiddleName().isBlank()) {
+                predicates.add(
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("fullName").get("middleName")),
+                                "%" + filter.getMiddleName().toLowerCase() + "%"
+                        )
+                );
+            }
+
+            if (filter.getStatus() != null) {
+                predicates.add(
+                        criteriaBuilder.equal(root.get("status"), filter.getStatus().getValue())
+                );
             }
 
             if (filter.getMdmCode() != null) {
