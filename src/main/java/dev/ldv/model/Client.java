@@ -1,5 +1,6 @@
 package dev.ldv.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,9 +38,19 @@ public class Client {
     private Long mdmCode;
 
     @Column(name = "created_at", nullable = false)
+    @JsonFormat(
+            shape = JsonFormat.Shape.STRING,
+            pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            timezone = "UTC"
+    )
     private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
+    @JsonFormat(
+            shape = JsonFormat.Shape.STRING,
+            pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            timezone = "UTC"
+    )
     private Instant updatedAt;
 
     @Override
