@@ -1,7 +1,5 @@
 package dev.ldv.service;
 
-import dev.ldv.model.ClientSpecification;
-import dev.ldv.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -11,12 +9,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.ldv.dto.*;
+import dev.ldv.api.model.*;
+import dev.ldv.dto.ClientFilter;
 import dev.ldv.exception.ApiError;
 import dev.ldv.exception.ApiException;
 import dev.ldv.mapper.ClientMapper;
 import dev.ldv.model.Client;
-import dev.ldv.model.ClientStatus;
+import dev.ldv.model.ClientSpecification;
+import dev.ldv.repository.AccountRepository;
 import dev.ldv.repository.ClientRepository;
 
 import java.time.Instant;
@@ -41,7 +41,7 @@ public class ClientServiceImpl implements ClientService {
         }
 
         Client newClient = ClientMapper.fromNewClientRequest(newClientRequest);
-        newClient.setClientStatus(ClientStatus.ACTIVE);
+        newClient.setStatus(ClientStatus.ACTIVE);
         newClient.setCreatedAt(Instant.now());
         newClient.setUpdatedAt(Instant.now());
 
@@ -71,7 +71,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Transactional(readOnly = true)
     @Override
-    public PageResponse<ClientShortDto> getPage(ClientFilter clientFilter) {
+    public ClientPageResponse getPage(ClientFilter clientFilter) {
         log.debug("Get client page: {}", clientFilter);
 
         Specification<Client> specification = ClientSpecification.withFilter(clientFilter);
@@ -127,7 +127,7 @@ public class ClientServiceImpl implements ClientService {
         Client foundClient = maybeClient.get();
         log.debug("Found client by id: {}", foundClient);
 
-        foundClient.setClientStatus(ClientStatus.DELETED);
+        foundClient.setStatus(ClientStatus.DELETED);
         foundClient.setUpdatedAt(Instant.now());
         log.info("Deleted client by id: {}", foundClient);
 
@@ -148,11 +148,11 @@ public class ClientServiceImpl implements ClientService {
         Client foundClient = maybeClient.get();
         log.debug("Found client by id: {}", foundClient);
 
-        return new ClientExistenceDto(true, id, foundClient.getClientStatus());
+        return new ClientExistenceDto(true, id, foundClient.getStatus());
     }
 
-    private PageResponse<ClientShortDto> toPageResponse(Page<Client> clients) {
-        PageResponse<ClientShortDto> pageResponse = new PageResponse<>();
+    private ClientPageResponse toPageResponse(Page<Client> clients) {
+        ClientPageResponse pageResponse = new ClientPageResponse();
         PageableObject pageableObject = new PageableObject();
 
         pageableObject.setPageNumber(clients.getNumber());

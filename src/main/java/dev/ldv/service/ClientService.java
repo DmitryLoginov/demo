@@ -1,6 +1,7 @@
 package dev.ldv.service;
 
-import dev.ldv.dto.*;
+import dev.ldv.api.model.*;
+import dev.ldv.dto.ClientFilter;
 
 import java.util.UUID;
 
@@ -9,7 +10,7 @@ public interface ClientService {
 
     ClientDto getById(UUID id);
 
-    PageResponse<ClientShortDto> getPage(ClientFilter clientFilter);
+    ClientPageResponse getPage(ClientFilter clientFilter);
 
     ClientDto update(UUID id, UpdateClientRequest updateClientRequest);
 
