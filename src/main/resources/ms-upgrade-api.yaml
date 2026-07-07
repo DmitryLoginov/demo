@@ -60,18 +60,38 @@ paths:
           schema:
             type: integer
             default: 20
+        - description: Фильтр по имени
+          in: query
+          name: firstName
+          required: false
+          schema:
+            type: string
         - description: Фильтр по фамилии
           in: query
           name: lastName
           required: false
           schema:
             type: string
+        - description: Фильтр по отчеству
+          in: query
+          name: middleName
+          required: false
+          schema:
+            type: string
+        - description: Фильтр по статусу
+          in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, BLOCKED, DELETED]
         - description: Фильтр по mdmCode
           in: query
           name: mdmCode
           required: false
           schema:
-            type: string
+            type: integer
+            format: int64
       responses:
         '200':
           description: Страница со сведениями о клиентах
@@ -252,6 +272,7 @@ components:
         - lastName
         - middleName
         - mdmCode
+        - citizenship
         - documentNumber
         - documentSeries
         - documentType
@@ -274,10 +295,6 @@ components:
           type: string
           description: Гражданство
           example: Российская Федерация
-        clientStatus:
-          type: string
-          description: Статус (тип) клиента
-          example: ACTIVE
         documentNumber:
           type: string
           description: Номер документа
@@ -291,9 +308,11 @@ components:
           description: Вид документа
           example: Паспорт
         mdmCode:
-          type: string
+          type: integer
+          format: int64
           description: MDM-идентификатор
           example: 1234567890
+          minimum: 1
     ClientDto:
       description: Информация о клиенте
       type: object
@@ -321,6 +340,7 @@ components:
           example: Российская Федерация
         clientStatus:
           type: string
+          enum: [ACTIVE, BLOCKED, DELETED]
           description: Статус (тип) клиента
           example: ACTIVE
         documentNumber:
@@ -336,15 +356,18 @@ components:
           description: Вид документа
           example: Паспорт
         mdmCode:
-          type: string
+          type: integer
+          format: int64
           description: MDM-идентификатор
           example: 1234567890
         createdAt:
           type: string
+          format: date-time
           description: Дата и время создания учетной записи
           example: "2024-01-15T10:30:00Z"
         updatedAt:
           type: string
+          format: date-time
           description: Дата и время последнего обновления
           example: "2024-01-15T10:30:00Z"
         hasAccounts:
@@ -352,6 +375,14 @@ components:
           description: Есть ли у пользователя аккаунты
           example: false
     UpdateClientRequest:
+      required:
+        - firstName
+        - lastName
+        - middleName
+        - citizenship
+        - documentNumber
+        - documentSeries
+        - documentType
       description: Обновленные данные о клиенте
       type: object
       properties:
@@ -409,12 +440,42 @@ components:
       properties:
         content:
           type: array
-          items:
-            $ref: '#/components/schemas/ClientDto'
+          items: {}
         pageable:
           $ref: '#/components/schemas/PageableObject'
     ClientShortDto:
       description: Краткая информация о клиенте
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+          description: Уникальный идентификатор
+          example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        firstName:
+          type: string
+          description: Имя
+          example: Иван
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
+        clientStatus:
+          type: string
+          enum: [ ACTIVE, BLOCKED, DELETED ]
+          description: Статус (тип) клиента
+          example: ACTIVE
+        mdmCode:
+          type: integer
+          format: int64
+          description: MDM-идентификатор
+          example: 1234567890
+    ClientExistenceDto:
+      description: Информация о существовании клиента
       type: object
       properties:
         exists:
