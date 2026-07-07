@@ -1,10 +1,11 @@
 package dev.ldv.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dev.ldv.utils.ObjectMapperUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import dev.ldv.utils.ObjectMapperUtils;
 
 @Entity
 @Table(name = "account_status")

@@ -2,6 +2,7 @@ package dev.ldv.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import dev.ldv.api.model.ClientStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +30,7 @@ public class Client {
 
     @Column(name = "client_status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private ClientStatus clientStatus;
+    private ClientStatus status;
 
     @Embedded
     private Document document;
