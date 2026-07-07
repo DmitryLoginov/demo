@@ -59,7 +59,7 @@ public class ClientController {
         return clientService.update(clientId, updateClientRequest);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{clientId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@RequestHeader("Content-Type") String contentType,
                            @RequestHeader("Accept") String accept,
@@ -76,5 +76,15 @@ public class ClientController {
         log.debug("GET /api/v1/clients/{}/exists", clientId);
 
         return clientService.exists(clientId);
+    }
+
+    private void validateHeaders(String contentType, String accept) {
+        if (!contentType.equals("application/json")) {
+            throw new RuntimeException("Invalid content type: " + contentType);
+        }
+
+        if (!accept.equals("application/json")) {
+            throw new RuntimeException("Invalid accept type: " + accept);
+        }
     }
 }
