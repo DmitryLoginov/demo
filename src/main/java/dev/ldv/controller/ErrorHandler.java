@@ -81,7 +81,7 @@ public class ErrorHandler {
                 ApiError.BAD_REQUEST.getStatusCode());
     }
 
-    /*@ExceptionHandler(ConstraintViolationException.class)
+    @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDto handleJakartaConstraintViolationException(ConstraintViolationException ex) {
         log.warn("400 {}", ex.getMessage(), ex);
@@ -104,7 +104,7 @@ public class ErrorHandler {
                         .map(entry -> entry.getKey() + ": " + entry.getValue())
                         .collect(Collectors.joining("; ")),
                 ApiError.BAD_REQUEST.getStatusCode());
-    }*/
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
