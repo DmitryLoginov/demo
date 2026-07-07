@@ -85,7 +85,7 @@ paths:
           name: status
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/ClientStatus"
         - description: Фильтр по mdmCode
           in: query
           name: mdmCode
@@ -93,6 +93,7 @@ paths:
           schema:
             type: integer
             format: int64
+            minimum: 1
       responses:
         '200':
           description: Страница со сведениями о клиентах
