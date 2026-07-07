@@ -1,15 +1,18 @@
 package dev.ldv.controller;
 
-import dev.ldv.dto.ErrorDto;
-import dev.ldv.exception.ApiError;
-import dev.ldv.exception.ApiException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import dev.ldv.dto.ErrorDto;
+import dev.ldv.exception.ApiError;
+import dev.ldv.exception.ApiException;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -24,7 +27,6 @@ public class ErrorHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorDto> handleApiException(ApiException ex) {
         ApiError apiError = ex.getApiError();
-        String errorDescription = ex.getErrorDescription();
 
         log.warn("{} {}", apiError.getStatusCode(), ex.getMessage(), ex);
 
@@ -33,12 +35,53 @@ public class ErrorHandler {
 
         ex.printStackTrace(printWriter);
 
-        ErrorDto errorDto = new ErrorDto(apiError.name(), errorDescription, apiError.getStatusCode());
+        ErrorDto errorDto = new ErrorDto(apiError.name(), ex.getMessage(), apiError.getStatusCode());
 
         return new ResponseEntity<>(errorDto, HttpStatus.valueOf(apiError.getStatusCode()));
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDto handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        log.warn("400 {}", ex.getMessage(), ex);
+
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+        ex.printStackTrace(printWriter);
+
+        String message = "Invalid value (" + ex.getValue() + ") provided for " + ex.getName();
+
+        return new ErrorDto(ApiError.BAD_REQUEST.name(), message,
+                ApiError.BAD_REQUEST.getStatusCode());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDto handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        log.warn("400 {}", ex.getMessage(), ex);
+
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+
+        ex.printStackTrace(printWriter);
+
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach((error) -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+
+            errors.put(fieldName, errorMessage);
+        });
+
+        return new ErrorDto(ApiError.BAD_REQUEST.name(),
+                errors.entrySet().stream()
+                        .map(entry -> entry.getKey() + ": " + entry.getValue())
+                        .collect(Collectors.joining("; ")),
+                ApiError.BAD_REQUEST.getStatusCode());
+    }
+
+    /*@ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDto handleJakartaConstraintViolationException(ConstraintViolationException ex) {
         log.warn("400 {}", ex.getMessage(), ex);
@@ -61,7 +104,7 @@ public class ErrorHandler {
                         .map(entry -> entry.getKey() + ": " + entry.getValue())
                         .collect(Collectors.joining("; ")),
                 ApiError.BAD_REQUEST.getStatusCode());
-    }
+    }*/
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
