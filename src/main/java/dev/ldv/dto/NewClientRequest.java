@@ -3,6 +3,7 @@ package dev.ldv.dto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import dev.ldv.utils.ObjectMapperUtils;
 @Setter
 public class NewClientRequest {
     @NotNull
+    @Positive
     private Long mdmCode;
     @NotBlank
     private String firstName;
