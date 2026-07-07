@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import dev.ldv.dto.*;
+import dev.ldv.exception.ApiException;
+import dev.ldv.exception.ApiError;
 import dev.ldv.service.ClientService;
 
 import java.util.UUID;
@@ -23,6 +25,8 @@ public class ClientController {
     public ClientDto create(@RequestHeader("Content-Type") String contentType,
                             @RequestHeader("Accept") String accept,
                             @RequestBody @Valid NewClientRequest newClientRequest) {
+        validateHeaders(contentType, accept);
+
         log.debug("POST /api/v1/clients");
         log.debug("Request body: {}", newClientRequest);
 
@@ -33,6 +37,8 @@ public class ClientController {
     public ClientDto getById(@RequestHeader("Content-Type") String contentType,
                              @RequestHeader("Accept") String accept,
                              @PathVariable UUID clientId) {
+        validateHeaders(contentType, accept);
+
         log.debug("GET /api/v1/clients/{}", clientId);
 
         return clientService.getById(clientId);
@@ -42,6 +48,8 @@ public class ClientController {
     public PageResponse<ClientShortDto> getPage(@RequestHeader("Content-Type") String contentType,
                                                 @RequestHeader("Accept") String accept,
                                                 ClientFilter clientFilter) {
+        validateHeaders(contentType, accept);
+
         log.debug("GET /api/v1/clients");
         log.debug("Query params: {}", clientFilter);
 
@@ -53,6 +61,8 @@ public class ClientController {
                             @RequestHeader("Accept") String accept,
                             @PathVariable UUID clientId,
                             @RequestBody @Valid UpdateClientRequest updateClientRequest) {
+        validateHeaders(contentType, accept);
+
         log.debug("PUT /api/v1/clients/{}", clientId);
         log.debug("Request body: {}", updateClientRequest);
 
@@ -64,6 +74,8 @@ public class ClientController {
     public void deleteById(@RequestHeader("Content-Type") String contentType,
                            @RequestHeader("Accept") String accept,
                            @PathVariable UUID clientId) {
+        validateHeaders(contentType, accept);
+
         log.debug("DELETE /api/v1/clients/{}", clientId);
 
         clientService.deleteById(clientId);
@@ -73,6 +85,8 @@ public class ClientController {
     public ClientExistenceDto exists(@RequestHeader("Content-Type") String contentType,
                                      @RequestHeader("Accept") String accept,
                                      @PathVariable UUID clientId) {
+        validateHeaders(contentType, accept);
+
         log.debug("GET /api/v1/clients/{}/exists", clientId);
 
         return clientService.exists(clientId);
@@ -80,11 +94,13 @@ public class ClientController {
 
     private void validateHeaders(String contentType, String accept) {
         if (!contentType.equals("application/json")) {
-            throw new RuntimeException("Invalid content type: " + contentType);
+            throw new ApiException(ApiError.BAD_REQUEST,
+                    "Invalid content type: " + contentType + ". Expecting application/json");
         }
 
         if (!accept.equals("application/json")) {
-            throw new RuntimeException("Invalid accept type: " + accept);
+            throw new ApiException(ApiError.BAD_REQUEST,
+                    "Invalid accept type: " + accept + ". Expecting application/json");
         }
     }
 }
