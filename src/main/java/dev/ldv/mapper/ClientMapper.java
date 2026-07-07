@@ -1,9 +1,9 @@
 package dev.ldv.mapper;
 
-import dev.ldv.dto.ClientDto;
-import dev.ldv.dto.ClientShortDto;
-import dev.ldv.dto.NewClientRequest;
-import dev.ldv.dto.UpdateClientRequest;
+import dev.ldv.api.model.ClientDto;
+import dev.ldv.api.model.ClientShortDto;
+import dev.ldv.api.model.NewClientRequest;
+import dev.ldv.api.model.UpdateClientRequest;
 import dev.ldv.model.Client;
 import dev.ldv.model.Document;
 import dev.ldv.model.Name;
@@ -43,7 +43,7 @@ public final class ClientMapper {
         clientDto.setMiddleName(client.getFullName().getMiddleName());
         clientDto.setCitizenship(client.getCitizenship());
         clientDto.setMdmCode(client.getMdmCode());
-        clientDto.setClientStatus(client.getClientStatus());
+        clientDto.setStatus(client.getStatus());
         clientDto.setDocumentNumber(client.getDocument().getDocumentNumber());
         clientDto.setDocumentSeries(client.getDocument().getDocumentSeries());
         clientDto.setDocumentType(client.getDocument().getDocumentType());
@@ -61,7 +61,7 @@ public final class ClientMapper {
         clientShortDto.setLastName(client.getFullName().getLastName());
         clientShortDto.setMiddleName(client.getFullName().getMiddleName());
         clientShortDto.setMdmCode(client.getMdmCode());
-        clientShortDto.setClientStatus(client.getClientStatus());
+        clientShortDto.setStatus(client.getStatus());
 
         return clientShortDto;
     }
