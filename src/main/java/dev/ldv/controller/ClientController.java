@@ -44,11 +44,11 @@ public class ClientController implements ApiClient {
                                       @RequestParam(required = false) String firstName,
                                       @RequestParam(required = false) String lastName,
                                       @RequestParam(required = false) String middleName,
-                                      @RequestParam(required = false) String status,
+                                      @RequestParam(required = false) ClientStatus status,
                                       @RequestParam(required = false) Long mdmCode) {
-        ClientFilter clientFilter = new ClientFilter(page, size, firstName, lastName, middleName, status, mdmCode);
-
         log.debug("GET /api/v1/clients");
+
+        ClientFilter clientFilter = new ClientFilter(page, size, firstName, lastName, middleName, status, mdmCode);
         log.debug("Query params: {}", clientFilter);
 
         return clientService.getPage(clientFilter);
