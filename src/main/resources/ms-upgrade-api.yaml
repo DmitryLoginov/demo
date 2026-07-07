@@ -182,7 +182,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClientShortDto'
+                $ref: '#/components/schemas/ClientExistenceDto'
 
 components:
   schemas:
@@ -219,30 +219,37 @@ components:
           type: string
           description: Имя
           example: Иван
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         lastName:
           type: string
           description: Фамилия
           example: Иванов
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         middleName:
           type: string
           description: Отчество
           example: Иванович
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         citizenship:
           type: string
           description: Гражданство
           example: Российская Федерация
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         documentNumber:
           type: string
           description: Номер документа
           example: 456789
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         documentSeries:
           type: string
           description: Серия документа
           example: '0123'
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         documentType:
           type: string
           description: Вид документа
           example: Паспорт
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         mdmCode:
           type: integer
           format: int64
@@ -323,30 +330,37 @@ components:
           type: string
           description: Имя
           example: Иван
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         lastName:
           type: string
           description: Фамилия
           example: Иванов
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         middleName:
           type: string
           description: Отчество
           example: Иванович
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         citizenship:
           type: string
           description: Гражданство
           example: Российская Федерация
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         documentNumber:
           type: string
           description: Номер документа
           example: 456789
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         documentSeries:
           type: string
           description: Серия документа
           example: '0123'
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
         documentType:
           type: string
           description: Вид документа
           example: Паспорт
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
     PageableObject:
       description: Метаданные пагинации
       type: object
@@ -374,7 +388,7 @@ components:
         content:
           type: array
           items:
-            $ref: "#/components/schemas/ClientDto"
+            $ref: "#/components/schemas/ClientShortDto"
         pageable:
           $ref: '#/components/schemas/PageableObject'
     ClientShortDto:
@@ -406,6 +420,10 @@ components:
           description: MDM-идентификатор
           example: 1234567890
     ClientExistenceDto:
+      required:
+        - exists
+        - clientId
+        - status
       description: Информация о существовании клиента
       type: object
       properties:
