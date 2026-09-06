@@ -19,8 +19,6 @@ import dev.ldv.model.ClientSpecification;
 import dev.ldv.repository.AccountRepository;
 import dev.ldv.repository.ClientRepository;
 
-import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,7 +31,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ClientDto create(NewClientRequest newClientRequest) {
-        log.debug("New client request: {}", newClientRequest);
+        log.debug("\nNew client request:\n{}", newClientRequest);
 
         if (clientRepository.findByMdmCode(newClientRequest.getMdmCode()).isPresent()) {
             log.warn("Client with mdmCode {} already exists", newClientRequest.getMdmCode());
@@ -42,11 +40,9 @@ public class ClientServiceImpl implements ClientService {
 
         Client newClient = ClientMapper.fromNewClientRequest(newClientRequest);
         newClient.setStatus(ClientStatus.ACTIVE);
-        newClient.setCreatedAt(Instant.now());
-        newClient.setUpdatedAt(Instant.now());
 
-        newClient = clientRepository.save(newClient);
-        log.info("New client saved: {}", newClient);
+        newClient = clientRepository.saveAndFlush(newClient);
+        log.info("\nNew client saved:\n{}", newClient);
 
         return ClientMapper.toClientDto(newClient);
     }
@@ -56,15 +52,13 @@ public class ClientServiceImpl implements ClientService {
     public ClientDto getById(UUID id) {
         log.debug("Get client by id: {}", id);
 
-        Optional<Client> maybeClient = clientRepository.findById(id);
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Client with id {} not found", id);
+                    return new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
+                });
 
-        if (maybeClient.isEmpty()) {
-            log.warn("Client with id {} not found", id);
-            throw new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
-        }
-
-        Client  client = maybeClient.get();
-        log.debug("Found client by id: {}", client);
+        log.debug("\nFound client by id:\n{}", client);
 
         return ClientMapper.toClientDto(client);
     }
@@ -72,7 +66,7 @@ public class ClientServiceImpl implements ClientService {
     @Transactional(readOnly = true)
     @Override
     public ClientPageResponse getPage(ClientFilter clientFilter) {
-        log.debug("Get client page: {}", clientFilter);
+        log.debug("\nGet client page:\n{}", clientFilter);
 
         Specification<Client> specification = ClientSpecification.withFilter(clientFilter);
         Pageable pageable = PageRequest.of(clientFilter.getPage(), clientFilter.getSize());
@@ -87,68 +81,60 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ClientDto update(UUID id, UpdateClientRequest updateClientRequest) {
-        log.debug("Update client request by id {}: {}", id, updateClientRequest);
+        log.debug("\nUpdate client request by id {}:\n{}", id, updateClientRequest);
 
-        Optional<Client> maybeClient = clientRepository.findById(id);
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Client with id {} not found", id);
+                    return new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
+                });
 
-        if (maybeClient.isEmpty()) {
-            log.warn("Client with id {} not found", id);
-            throw new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
-        }
+        log.debug("\nFound client by id:\n{}", client);
 
-        Client foundClient = maybeClient.get();
-        log.debug("Found client by id: {}", foundClient);
+        ClientMapper.updateFields(client, updateClientRequest);
+        clientRepository.flush();
 
-        ClientMapper.updateFields(foundClient, updateClientRequest);
-        foundClient.setUpdatedAt(Instant.now());
-        log.info("Updated client by id: {}", foundClient);
+        log.info("\nUpdated client by id:\n{}", client);
 
-        foundClient = clientRepository.save(foundClient);
-
-        return ClientMapper.toClientDto(foundClient);
+        return ClientMapper.toClientDto(client);
     }
 
     @Override
     public void deleteById(UUID id) {
         log.debug("Delete client by id: {}", id);
 
-        Optional<Client> maybeClient = clientRepository.findById(id);
-
-        if (maybeClient.isEmpty()) {
-            log.warn("Client with id {} not found", id);
-            throw new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
-        }
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Client with id {} not found", id);
+                    return new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
+                });
 
         if (accountRepository.existsByClientIdAndStatusName(id, "CREATED")) {
             log.warn("Client has active accounts");
             throw new ApiException(ApiError.CONFLICT, "Client has active accounts");
         }
 
-        Client foundClient = maybeClient.get();
-        log.debug("Found client by id: {}", foundClient);
+        log.debug("\nFound client by id:\n{}", client);
 
-        foundClient.setStatus(ClientStatus.DELETED);
-        foundClient.setUpdatedAt(Instant.now());
-        log.info("Deleted client by id: {}", foundClient);
+        client.setStatus(ClientStatus.DELETED);
+        log.info("\nDeleted client by id:\n{}", client);
 
-        clientRepository.save(foundClient);
+        clientRepository.flush();
     }
 
     @Transactional(readOnly = true)
     public ClientExistenceDto exists(UUID id) {
         log.debug("Exists client by id: {}", id);
 
-        Optional<Client> maybeClient = clientRepository.findById(id);
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Client with id {} not found", id);
+                    return new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
+                });
 
-        if (maybeClient.isEmpty()) {
-            log.warn("Client with id {} not found", id);
-            throw new ApiException(ApiError.NOT_FOUND, "Client with given id not found");
-        }
+        log.debug("\nFound client by id:\n{}", client);
 
-        Client foundClient = maybeClient.get();
-        log.debug("Found client by id: {}", foundClient);
-
-        return new ClientExistenceDto(true, id, foundClient.getStatus());
+        return new ClientExistenceDto(true, id, client.getStatus());
     }
 
     private ClientPageResponse toPageResponse(Page<Client> clients) {
