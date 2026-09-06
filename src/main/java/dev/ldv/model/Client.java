@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import dev.ldv.utils.ObjectMapperUtils;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -39,6 +41,7 @@ public class Client {
     private Long mdmCode;
 
     @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
     @JsonFormat(
             shape = JsonFormat.Shape.STRING,
             pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
@@ -47,6 +50,7 @@ public class Client {
     private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
     @JsonFormat(
             shape = JsonFormat.Shape.STRING,
             pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
