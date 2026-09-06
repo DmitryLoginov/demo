@@ -27,13 +27,7 @@ public class ErrorHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorDto> handleApiException(ApiException ex) {
         ApiError apiError = ex.getApiError();
-
         log.warn("{} {}", apiError.getStatusCode(), ex.getMessage(), ex);
-
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-
-        ex.printStackTrace(printWriter);
 
         ErrorDto errorDto = new ErrorDto(apiError.name(), ex.getMessage(), apiError.getStatusCode());
 
@@ -45,11 +39,6 @@ public class ErrorHandler {
     public ErrorDto handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         log.warn("400 {}", ex.getMessage(), ex);
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-
-        ex.printStackTrace(printWriter);
-
         String message = "Invalid value (" + ex.getValue() + ") provided for " + ex.getName();
 
         return new ErrorDto(ApiError.BAD_REQUEST.name(), message,
@@ -60,11 +49,6 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDto handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         log.warn("400 {}", ex.getMessage(), ex);
-
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-
-        ex.printStackTrace(printWriter);
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach((error) -> {
@@ -86,11 +70,6 @@ public class ErrorHandler {
     public ErrorDto handleJakartaConstraintViolationException(ConstraintViolationException ex) {
         log.warn("400 {}", ex.getMessage(), ex);
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-
-        ex.printStackTrace(printWriter);
-
         Map<String, String> errors = new HashMap<>();
         ex.getConstraintViolations().forEach(constraintViolation -> {
             String propertyName = constraintViolation.getPropertyPath().toString();
@@ -110,11 +89,6 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorDto handleException(Exception ex) {
         log.warn("500 {}", ex.getMessage(), ex);
-
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-
-        ex.printStackTrace(printWriter);
 
         return new ErrorDto(ApiError.INTERNAL_SERVER_ERROR.name(), "Unexpected error",
                 ApiError.INTERNAL_SERVER_ERROR.getStatusCode());
