@@ -1,27 +1,25 @@
 package dev.ldv.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 
 import dev.ldv.utils.ObjectMapperUtils;
 
-@Entity
-@Table(name = "account_status")
+@Embeddable
 @Getter
 @Setter
-public class AccountStatus {
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Name {
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
-    @Column(name = "description", nullable = false)
-    private String description;
+    @Column(name = "middle_name", nullable = false)
+    private String middleName;
 
     @Override
     public String toString() {

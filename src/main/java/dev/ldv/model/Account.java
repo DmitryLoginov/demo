@@ -1,10 +1,12 @@
 package dev.ldv.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dev.ldv.utils.ObjectMapperUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import dev.ldv.utils.ObjectMapperUtils;
 
 import java.util.UUID;
 
@@ -20,10 +22,11 @@ public class Account {
 
     @OneToOne
     @JoinColumn(name = "status_id", nullable = false)
-    private AccountStatus accountStatus;
+    private AccountStatus status;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
+    @JsonIgnore
     private Client client;
 
     @Column(name = "account_type")

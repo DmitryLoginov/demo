@@ -17,6 +17,9 @@ spring:
   liquibase:
     enabled: true
     change-log: ${DATABASE_CHANGELOG}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
 
 management:
   server:
@@ -31,3 +34,6 @@ management:
       base-path: ${ACTUATOR_BASEPATH}
       exposure:
         include: "health,info,threaddump,liquibase,metrics,mappings,beans,env"
+
+api:
+  prefix: "/api/v1"

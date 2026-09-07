@@ -1,0 +1,474 @@
+openapi: 3.0.3
+info:
+  title: ms-account-reservation
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Клиенты
+    description: API для управления клиентами
+paths:
+  /api/v1/clients:
+    post:
+      tags:
+        - Клиенты
+      description: Создание нового клиента
+      summary: Создание нового клиента
+      operationId: create
+      requestBody:
+        description: Сведения о новом клиенте
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewClientRequest'
+        required: true
+      responses:
+        '201':
+          description: Новый клиент с присвоенным ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          $ref: '#/components/responses/ClientValidationError'
+        '409':
+          description: Клиент с таким mdmCode уже существует
+          content:
+            application/json:
+              example:
+                errorCode: CONFLICT
+                errorDescription: Клиент с таким mdmCode уже существует
+                statusCode: 409
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+    get:
+      tags:
+        - Клиенты
+      description: Получение списка клиентов с пагинацией
+      summary: Получение списка клиентов
+      operationId: getPage
+      parameters:
+        - description: Номер страницы
+          in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - description: Размер страницы
+          in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - description: Фильтр по имени
+          in: query
+          name: firstName
+          required: false
+          schema:
+            type: string
+        - description: Фильтр по фамилии
+          in: query
+          name: lastName
+          required: false
+          schema:
+            type: string
+        - description: Фильтр по отчеству
+          in: query
+          name: middleName
+          required: false
+          schema:
+            type: string
+        - description: Фильтр по статусу
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: "#/components/schemas/ClientStatus"
+        - description: Фильтр по mdmCode
+          in: query
+          name: mdmCode
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Страница со сведениями о клиентах
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientPageResponse'
+  /api/v1/clients/{clientId}:
+    get:
+      tags:
+        - Клиенты
+      description: Получение клиента по ID
+      summary: Получение клиента по ID
+      operationId: getById
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      responses:
+        '200':
+          description: Сведения о запрашиваемом клиенте
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '404':
+          $ref: '#/components/responses/ClientNotFoundError'
+    put:
+      tags:
+        - Клиенты
+      description: Обновление информации о клиенте
+      summary: Обновление клиента
+      operationId: update
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      requestBody:
+        description: Обновленные данные клиента
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClientRequest'
+        required: true
+      responses:
+        '200':
+          description: Данные о клиенте успешно обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          $ref: '#/components/responses/ClientValidationError'
+        '404':
+          $ref: '#/components/responses/ClientNotFoundError'
+    delete:
+      tags:
+        - Клиенты
+      description: Удаление клиента (soft delete)
+      summary: Удаление клиента
+      operationId: deleteById
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      responses:
+        '204':
+          description: Клиент удален
+        '404':
+          $ref: '#/components/responses/ClientNotFoundError'
+        '409':
+          description: У клиента есть активные счета
+          content:
+            application/json:
+              example:
+                errorCode: CONFLICT
+                errorDescription: У клиента есть активные счета
+                statusCode: 409
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+  /api/v1/clients/{clientId}/exists:
+    get:
+      tags:
+        - Клиенты
+      description: Проверка существования клиента
+      summary: Проверка существования клиента
+      operationId: exists
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      responses:
+        '200':
+          description: Результат проверки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientExistenceDto'
+
+components:
+  schemas:
+    ErrorDto:
+      type: object
+      description: Сведения об ошибке
+      properties:
+        errorCode:
+          type: string
+          description: Текстовый мнемокод
+          example: BAD_REQUEST
+        errorDescription:
+          type: string
+          description: Бизнес-описание ошибки
+          example: Поле lastName должно быть заполнено
+        statusCode:
+          type: integer
+          description: HTTP-код ошибки
+          example: 400
+    NewClientRequest:
+      required:
+        - firstName
+        - lastName
+        - middleName
+        - mdmCode
+        - citizenship
+        - documentNumber
+        - documentSeries
+        - documentType
+      description: Данные нового клиента
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Имя
+          example: Иван
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        citizenship:
+          type: string
+          description: Гражданство
+          example: Российская Федерация
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        documentNumber:
+          type: string
+          description: Номер документа
+          example: 456789
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        documentSeries:
+          type: string
+          description: Серия документа
+          example: '0123'
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        documentType:
+          type: string
+          description: Вид документа
+          example: Паспорт
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        mdmCode:
+          type: integer
+          format: int64
+          description: MDM-идентификатор
+          example: 1234567890
+          minimum: 1
+    ClientDto:
+      description: Информация о клиенте
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+          description: Уникальный идентификатор
+          example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        firstName:
+          type: string
+          description: Имя
+          example: Иван
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
+        citizenship:
+          type: string
+          description: Гражданство
+          example: Российская Федерация
+        status:
+          $ref: "#/components/schemas/ClientStatus"
+        documentNumber:
+          type: string
+          description: Номер документа
+          example: 456789
+        documentSeries:
+          type: string
+          description: Серия документа
+          example: '0123'
+        documentType:
+          type: string
+          description: Вид документа
+          example: Паспорт
+        mdmCode:
+          type: integer
+          format: int64
+          description: MDM-идентификатор
+          example: 1234567890
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время создания учетной записи
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата и время последнего обновления
+          example: "2024-01-15T10:30:00Z"
+        hasAccounts:
+          type: boolean
+          description: Есть ли у пользователя аккаунты
+          example: false
+    UpdateClientRequest:
+      required:
+        - firstName
+        - lastName
+        - middleName
+        - citizenship
+        - documentNumber
+        - documentSeries
+        - documentType
+      description: Обновленные данные о клиенте
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Имя
+          example: Иван
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        citizenship:
+          type: string
+          description: Гражданство
+          example: Российская Федерация
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        documentNumber:
+          type: string
+          description: Номер документа
+          example: 456789
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        documentSeries:
+          type: string
+          description: Серия документа
+          example: '0123'
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+        documentType:
+          type: string
+          description: Вид документа
+          example: Паспорт
+          x-field-extra-annotation: "@jakarta.validation.constraints.NotBlank"
+    PageableObject:
+      description: Метаданные пагинации
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          description: Номер страницы
+          example: 0
+        pageSize:
+          type: integer
+          description: Размер страницы
+          example: 20
+        totalPages:
+          type: integer
+          description: Всего страниц
+          example: 1
+        totalElements:
+          type: integer
+          description: Всего элементов
+          example: 1
+    ClientPageResponse:
+      description: Страница с данными о клиентах
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientShortDto"
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+    ClientShortDto:
+      description: Краткая информация о клиенте
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+          description: Уникальный идентификатор
+          example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        firstName:
+          type: string
+          description: Имя
+          example: Иван
+        lastName:
+          type: string
+          description: Фамилия
+          example: Иванов
+        middleName:
+          type: string
+          description: Отчество
+          example: Иванович
+        status:
+          $ref: "#/components/schemas/ClientStatus"
+        mdmCode:
+          type: integer
+          format: int64
+          description: MDM-идентификатор
+          example: 1234567890
+    ClientExistenceDto:
+      required:
+        - exists
+        - clientId
+        - status
+      description: Информация о существовании клиента
+      type: object
+      properties:
+        exists:
+          type: boolean
+          description: Факт наличия информации о клиенте в БД
+          example: true
+        clientId:
+          type: string
+          format: UUID
+          description: Уникальный идентификатор
+          example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        status:
+          $ref: "#/components/schemas/ClientStatus"
+    ClientStatus:
+      description: Статус клиента
+      type: string
+      enum: [ACTIVE, BLOCKED, DELETED]
+  # Переиспользуемые параметры
+  parameters:
+    ClientId:
+      description: ID клиента
+      in: path
+      name: clientId
+      required: true
+      schema:
+        type: string
+        format: UUID
+        example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+  # Переиспользуемые ответы
+  responses:
+    ClientValidationError:
+      description: Некорректные данные в запросе
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDto'
+    ClientNotFoundError:
+      description: Запрашиваемый клиент не найден
+      content:
+        application/json:
+          example:
+            errorCode: NOT_FOUND
+            errorDescription: Клиент с id = a1b2c3d4-e5f6-7890-abcd-ef1234567890 не найден
+            statusCode: 404
+          schema:
+            $ref: '#/components/schemas/ErrorDto'

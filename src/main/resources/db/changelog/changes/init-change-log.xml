@@ -31,11 +31,19 @@
             <column name="id" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="full_name" type="varchar(255)">
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="citizenship" type="varchar(255)"/>
-            <column name="client_type" type="varchar(255)"/>
+            <column name="client_status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="document_number" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -45,7 +53,15 @@
             <column name="document_type" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="mdm_code" type="bigint"/>
+            <column name="mdm_code" type="bigint">
+                <constraints unique="true"/>
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -119,5 +135,27 @@
             <column name="name" value="CLOSED"/>
             <column name="description" value="Счет закрыт"/>
         </insert>
+    </changeSet>
+    
+    <changeSet id="006-create-index-for-clients-on-mdm_code" author="ldv">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_mdm_code" tableName="client"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="client" indexName="idx_mdm_code">
+            <column name="mdm_code"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="007-create-index-for-accounts-on-client_id" author="ldv">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_client_id" columnNames="account"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="account" indexName="idx_client_id">
+            <column name="client_id"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>
